@@ -17,6 +17,7 @@ const Progress = () => {
     continue: false,
   });
   const [step, setStep] = useState(0);
+  const [accounts, setAccounts] = useState([]);
 
   useEffect(() => {
     if (form.network === "") {
@@ -36,8 +37,15 @@ const Progress = () => {
           continue: false,
         };
       });
+      setAccounts([]);
     }
   }, [form.network]);
+
+  useEffect(() => {
+    if (form.continue === true) {
+      setStep(2);
+    }
+  }, [form.continue]);
 
   return (
     <Steps
@@ -50,8 +58,7 @@ const Progress = () => {
             <div
               className="px-3 m-1 rounded-md w-full"
               style={{
-                boxShadow:
-                  "rgba(9, 30, 66, 0.25) 0px 1px 1px, rgba(9, 30, 66, 0.13) 0px 0px 1px 1px",
+                boxShadow: "rgba(9, 30, 66, 0.25) 0px 1px 1px, rgba(9, 30, 66, 0.13) 0px 0px 1px 1px",
               }}
             >
               Select a Network
@@ -64,22 +71,26 @@ const Progress = () => {
             <div
               className="px-3 m-1 rounded-md w-full"
               style={{
-                boxShadow:
-                  "rgba(9, 30, 66, 0.25) 0px 1px 1px, rgba(9, 30, 66, 0.13) 0px 0px 1px 1px",
+                boxShadow: "rgba(9, 30, 66, 0.25) 0px 1px 1px, rgba(9, 30, 66, 0.13) 0px 0px 1px 1px",
               }}
             >
               Create wallet or use your existing wallet by entering your secret 12 words.
             </div>
           ),
-          description: <>{form.network !== "" ? <GetSeed form={form} setForm={setForm} /> : null}</>,
+          description: (
+            <>
+              {form.network !== "" ? (
+                <GetSeed form={form} setForm={setForm} accounts={accounts} setAccounts={setAccounts} />
+              ) : null}
+            </>
+          ),
         },
         {
           title: (
             <div
               className="px-3 m-1 rounded-md w-full"
               style={{
-                boxShadow:
-                  "rgba(9, 30, 66, 0.25) 0px 1px 1px, rgba(9, 30, 66, 0.13) 0px 0px 1px 1px",
+                boxShadow: "rgba(9, 30, 66, 0.25) 0px 1px 1px, rgba(9, 30, 66, 0.13) 0px 0px 1px 1px",
               }}
             >
               Transection Process

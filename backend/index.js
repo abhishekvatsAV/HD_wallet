@@ -10,6 +10,9 @@ const bip32 = BIP32Factory(ecc);
 require("dotenv").config();
 
 const app = express();
+const cors = require("cors");
+
+app.use(cors());
 
 const now_nodes_api_key = process.env.now_nodes_api_key;
 
