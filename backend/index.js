@@ -2,6 +2,7 @@ const bip39 = require("bip39");
 const express = require("express");
 const ecc = require("tiny-secp256k1");
 const { BIP32Factory } = require("bip32");
+const { ethers } = require("ethers");
 const bitcoin = require("bitcoinjs-lib");
 const { default: ECPairFactory } = require("ecpair");
 // You must wrap a tiny-secp256k1 compatible implementation
@@ -22,9 +23,9 @@ function deriveWalletsFromHdNode(mnemonic, derivationPath, numberOfAccounts) {
     let hdNode = ethers.utils.HDNode.fromMnemonic(mnemonic).derivePath(
       derivationPath + "/" + i
     );
-    console.log(hdNode);
+    // console.log(hdNode);
     let wallet = new ethers.Wallet(hdNode.privateKey);
-    wallets.push(wallet);
+    wallets.push({ privateKey: wallet.privateKey, address: wallet.address });
   }
   return wallets;
 }
@@ -50,23 +51,22 @@ const restoreEthereumWallet = async (mnemonic) => {
   return ethers.Wallet.fromMnemonic(mnemonic);
 };
 
-const createEthereumWallet = async () => {
+const createEthereumWallet = async (accountsNo) => {
   // generate Mnemonic
   let randomEntropyBytes = ethers.utils.randomBytes(16);
   const mnemonic = ethers.utils.entropyToMnemonic(randomEntropyBytes);
   //   validate mnemonic
-  const isValid = ethers.utils.isValidMnemonic(mnemonic);
-  let wallet;
-  if (isValid) {
-    wallet = ethers.utils.HDNode.fromMnemonic(mnemonic);
-    console.log(wallet);
-  }
-  const xpriv = wallet.privateKey;
-  const xpub = wallet.publicKey;
-  const address = wallet.address;
-  console.log(xpriv, xpub, address);
+  const wallet = ethers.utils.HDNode.fromMnemonic(mnemonic);
+  console.log(wallet);
+  console.log(mnemonic);
+  // const xpriv = wallet.privateKey;
+  // const xpub = wallet.publicKey;
+  // const address = wallet.address;
+  // console.log(xpriv, xpub, address);
 
-  //   let derivationPath = "m/44'/60'/0'/0";
+  let derivationPath = "m/44'/60'/0'/0";
+  const wallets = deriveWalletsFromHdNode(mnemonic, derivationPath, accountsNo);
+  return { mnemonic, wallets };
 };
 
 const derivedWalletsFromBitcoinNode = async (
@@ -80,21 +80,17 @@ const derivedWalletsFromBitcoinNode = async (
   for (let i = 0; i < numberOfAccounts; i++) {
     let childNode = root.derivePath(derivationPath + "/" + i);
 
-    console.log(childNode);
-    console.log("privatekey :", childNode.privateKey.toString("hex"));
+    const privateKey = childNode.privateKey.toString("hex");
     const address = bitcoin.payments.p2pkh({
       pubkey: childNode.publicKey,
       network,
     }).address;
-    console.log(address);
-    console.log("public key : ", childNode.publicKey.toString("hex"));
-    wallets.push(childNode.toBase58());
+    wallets.push({ privateKey: privateKey, address: address });
   }
-  const path = "m/49'/1'/0'/0";
-  const child = root.derivePath(path);
+  return wallets;
 };
 
-const createBitcoinWallet = async () => {
+const createBitcoinWallet = async (accountNo) => {
   // generate mnemonic
   const mnemonic = bip39.generateMnemonic();
   console.log(mnemonic);
@@ -104,16 +100,35 @@ const createBitcoinWallet = async () => {
   console.log("priv : ", root.privateKey.toString("hex"));
   console.log("child nodes ----------------");
   const path = "m/49'/1'/0'/0";
-  derivedWalletsFromBitcoinNode(root, path, 2);
+  const wallets = await derivedWalletsFromBitcoinNode(root, path, accountNo);
+  return { mnemonic, wallets };
 };
 
 // create ethereum for the user -------------------
-app.get("/createEthereumAccount", (req, res) => {
-  createEthereumWallet();
-});
-
-app.get("/createBitcoinAccount", (req, res) => {
-  createBitcoinWallet();
+app.get("/:network/:number_of_addresses", async (req, res) => {
+  const { network, number_of_addresses } = req.params;
+  console.log(network, number_of_addresses);
+  let result;
+  try {
+    if (network == "ethereum") {
+      result = await createEthereumWallet(number_of_addresses);
+    } else if (network == "bitcoin") {
+      result = await createBitcoinWallet(number_of_addresses);
+    }
+  } catch (e) {
+    console.log(e);
+  }
+  console.log(result);
+  const { mnemonic: seedToSend, wallets: accounts } = result;
+  const accountsToSend = [];
+  for (let i = 0; i < accounts?.length; i++) {
+    accountsToSend.push({
+      privateKey: accounts[i].privateKey,
+      address: accounts[i].address,
+      balance: 0,
+    });
+  }
+  res.status(200).json({ seed: seedToSend, accounts: accountsToSend });
 });
 
 // listening on port 3000-----------------
