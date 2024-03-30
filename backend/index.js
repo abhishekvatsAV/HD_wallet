@@ -6,7 +6,9 @@ const express = require("express");
 
 const app = express();
 
-port = 3000;
+const port = 3000;
+// const ethMainnet = "https://eth.nownodes.io/"
+// const ethTestnet = `eth-sepolia.nownodes.io/${pro}`
 const createBitcoinWallet = async () => {
   console.log(" creation of bitcoin wallet in progress -----");
 };
@@ -39,33 +41,14 @@ async function signTransaction(wallet, toAddress, value) {
     value: ethers.utils.parseEther(value),
     data: "0x",
   };
-  return wallet.sign(transaction);
+  sendTransaction(wallet);
 }
 
-const sendTransaction = async () => {
-  var data =
-    '{\n    "jsonrpc": "2.0",\n    "method": "eth_sendTransaction",\n    "params": [\n        {\n            "from": "0xb60e8dd61c5d32be8058bb8eb970870f07233155",\n            "to": "0xd46e8dd67c5d32be8058bb8eb970870f07244567",\n            "gas": "0x76c0", // 30400\n            "gasPrice": "0x9184e72a000", // 10000000000000\n            "value": "0x9184e72a", // 2441406250\n            "data": "0xd46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675"\n        }\n    ],\n    "id": 1\n}';
-  var daata = {
-    jsonrc: "2.0",
-    method: "eth_sendTransaction",
-  };
-  var config = {
-    method: "post",
-    maxBodyLength: Infinity,
-    url: "https://eth.nownodes.io/14188213-eac0-40f4-a03d-7aec5f671ebb",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    data: data,
-  };
-
-  axios(config)
-    .then(function (response) {
-      console.log(JSON.stringify(response.data));
-    })
-    .catch(function (error) {
-      console.log(error);
-    });
+const sendTransaction = async (wallet) => {
+  const provider = new ethers.providers.JsonRpcProvider(
+    "https://eth.nownodes.io/14188213-eac0-40f4-a03d-7aec5f671ebb"
+  );
+  const signer = wallet.connect(provider);
 };
 
 const createEthereumWallet = async () => {
