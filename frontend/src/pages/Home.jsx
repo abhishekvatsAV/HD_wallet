@@ -3,6 +3,7 @@ import { Button, Divider, Flex, Radio } from "antd";
 import Progress from "./Progress";
 
 const Home = () => {
+
   return (
     <div className="flex h-full mx-auto flex-col flex-1 items-center ">
       <div

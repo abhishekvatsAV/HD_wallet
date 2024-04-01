@@ -3,49 +3,19 @@ import { Steps } from "antd";
 import Network from "../components/Network";
 import GetSeed from "../components/GetSeed";
 import Transaction from "../components/Transaction";
-const description = "This is a description.";
+import { useStore } from "../store/store.js";
+
 const Progress = () => {
-  const [form, setForm] = useState({
-    network: "",
-    seed: "",
-    seed_type: "",
-    coin: "",
-    from_address: "",
-    to_address: "",
-    amount: "",
-    number_of_addresses: "",
-    continue: false,
-  });
-  const [step, setStep] = useState(0);
-  const [accounts, setAccounts] = useState([]);
-
-  useEffect(() => {
-    if (form.network === "") {
-      setStep(0);
-    } else {
-      setStep(1);
-      setForm((prev) => {
-        return {
-          ...prev,
-          seed_type: "",
-          seed: "",
-          number_of_addresses: "",
-          coin: "",
-          from_address: "",
-          to_address: "",
-          amount: "",
-          continue: false,
-        };
-      });
-      setAccounts([]);
-    }
-  }, [form.network]);
-
-  useEffect(() => {
-    if (form.continue === true) {
-      setStep(2);
-    }
-  }, [form.continue]);
+  const { form, step, isTransactionVisible } = useStore((state) => ({
+    form: state.form,
+    setForm: state.setForm,
+    step: state.step,
+    setStep: state.setStep,
+    accounts: state.accounts,
+    setAccounts: state.setAccounts,
+    isTransactionVisible: state.isTransactionVisible,
+  }));
+  console.log("🔥  form: ", form);
 
   return (
     <Steps
@@ -64,7 +34,7 @@ const Progress = () => {
               Select a Network
             </div>
           ),
-          description: <Network form={form} setForm={setForm} />,
+          description: <Network />,
         },
         {
           title: (
@@ -77,13 +47,7 @@ const Progress = () => {
               Create wallet or use your existing wallet by entering your secret 12 words.
             </div>
           ),
-          description: (
-            <>
-              {form.network !== "" ? (
-                <GetSeed form={form} setForm={setForm} accounts={accounts} setAccounts={setAccounts} />
-              ) : null}
-            </>
-          ),
+          description: <>{form?.network !== "" ? <GetSeed /> : null}</>,
         },
         {
           title: (
@@ -96,7 +60,7 @@ const Progress = () => {
               Transection Process
             </div>
           ),
-          description: <>{form?.continue ? <Transaction form={form} setForm={setForm} /> : null}</>,
+          description: <>{isTransactionVisible ? <Transaction /> : null}</>,
         },
       ]}
     />
