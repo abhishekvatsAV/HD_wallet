@@ -2,17 +2,22 @@ const { ethers, Wallet } = require("ethers");
 const { default: axios } = require("axios");
 require("dotenv").config();
 
-const now_nodes_api_key = process.env.now_nodes_api_key;
+const alchemy_mainnet_api_key = process.env.alchemy_mainnet_api_key;
+const alchemy_sepolia_api_key = process.env.alchemy_sepolia_api_key;
 
-const ethMainnet = `https://eth.nownodes.io/${now_nodes_api_key}`;
+const ethMainnet = `https://eth-mainnet.g.alchemy.com/v2/${alchemy_mainnet_api_key}`;
+const ethTestNet = `https://eth-sepolia.g.alchemy.com/v2/${alchemy_sepolia_api_key}`;
 
 // generate new wallet with randomly generated seed phrase -----
 const generateEthereumWallet = async (index) => {
   let randomEntropyBytes = ethers.utils.randomBytes(16);
   const mnemonic = ethers.utils.entropyToMnemonic(randomEntropyBytes);
   const accounts = await createEthereumWallet(mnemonic, index);
-  const updatedAccounts = await getEthAccountsBalance(accounts);
-  return { mnemonic, updatedAccounts };
+  // const updatedAccounts = await getEthAccountsBalance(accounts);
+  for (let i = 0; i < accounts.length; i++) {
+    accounts[i].balance = 0;
+  }
+  return { mnemonic, updatedAccounts: accounts };
 };
 
 // restore wallet with given seed phrase ------

@@ -12,5 +12,9 @@
     "ethers": "^5.7.2",
     "express": "^4.19.2",
     "tiny-secp256k1": "^2.2.3"
+  },
+  "scripts": {
+    "start": "nodemon index.js",
+    "dev": "nodemon index.js"
   }
 }
