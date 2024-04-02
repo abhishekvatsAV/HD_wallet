@@ -3,9 +3,11 @@ const ethWallet = require("./ethWallet");
 const btcWallet = require("./btcWallet");
 const { ethers, Wallet } = require("ethers");
 require("dotenv").config();
+const cors = require("cors");
 
 const app = express();
 app.use(express.json());
+app.use(cors());
 
 const port = 3000;
 
@@ -26,6 +28,8 @@ app.get("/:network/:number_of_addresses", async (req, res) => {
     }
   } catch (e) {
     console.log(e);
+    res.status(404).json({ message: "error in generating wallet" });
+    return;
   }
   console.log("result of the generated wallet : ", result);
   const { mnemonic: seedToSend, updatedAccounts: accounts } = result;
@@ -101,12 +105,6 @@ app.post("/sendTransaction", async (req, res) => {
   console.log(result);
   const wallet = new Wallet(privateKey);
   res.status(200).json({ address: wallet.address, balance: result });
-});
-
-app.post("/getBtcBalance", async (req, res) => {
-  const accounts = req.body;
-  const result = await btcWallet.getBtcAccountsBalance(accounts);
-  res.status(200).json({ success: result });
 });
 
 // listening on port 3000-----------------
