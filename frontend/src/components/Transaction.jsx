@@ -24,6 +24,7 @@ const Transaction = () => {
     const privateKey = accounts?.find((account) => account?.address === from_address)?.privateKey;
     try {
       const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/sendTransaction`, {
+        fromAddress: from_address,
         privateKey,
         toAddress: to_address,
         value: amount,
