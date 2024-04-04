@@ -50,6 +50,12 @@ block_cypher_api=put your block cypher api key
 
 
 
+## Note : 
+For mainnet transaction changes in backend/ethWallet.js file
+line 57 and line 72 change 
+ethTestNet to ethMainNet
+
+
 
 
 

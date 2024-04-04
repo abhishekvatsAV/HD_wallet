@@ -5,7 +5,7 @@ require("dotenv").config();
 const alchemy_mainnet_api_key = process.env.alchemy_mainnet_api_key;
 const alchemy_sepolia_api_key = process.env.alchemy_sepolia_api_key;
 
-const ethMainnet = `https://eth-mainnet.g.alchemy.com/v2/${alchemy_mainnet_api_key}`;
+const ethMainNet = `https://eth-mainnet.g.alchemy.com/v2/${alchemy_mainnet_api_key}`;
 const ethTestNet = `https://eth-sepolia.g.alchemy.com/v2/${alchemy_sepolia_api_key}`;
 
 // generate new wallet with randomly generated seed phrase -----
@@ -54,7 +54,7 @@ const deriveWalletsFromEthereumNode = async (
 };
 
 const getEthAccountsBalance = async (accounts) => {
-  const provider = new ethers.providers.JsonRpcProvider(ethMainnet);
+  const provider = new ethers.providers.JsonRpcProvider(ethTestNet);    // change this to ethMainNet for mainnet
   for (let i = 0; i < accounts.length; i++) {
     let walletPrivateKey = new Wallet(accounts[i].privateKey);
 
@@ -69,7 +69,7 @@ const getEthAccountsBalance = async (accounts) => {
 
 const sendEthTransaction = async (PrivateKey, toAddress, value) => {
   const walletPrivateKey = new Wallet(PrivateKey);
-  const provider = new ethers.providers.JsonRpcProvider(ethMainnet);
+  const provider = new ethers.providers.JsonRpcProvider(ethTestNet);   // change this to ethMainNet for mainnet
   const wallet = walletPrivateKey.connect(provider);
   const balance = await wallet.getBalance();
   if (value >= balance) {

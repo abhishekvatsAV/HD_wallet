@@ -41,12 +41,12 @@ const GetSeed = () => {
       const new_accounts = data.accounts.map((account) => {
         return {
           address: account.address,
-          privateKey: account.privateKey.slice(0, 4) + "..." + account.privateKey.slice(-4),
+          privateKey: account.privateKey,
           balance: account.balance,
         };
       });
 
-      setForm({ ...form, seed: data.seed, from_address: new_accounts[0].address});
+      setForm({ ...form, seed: data.seed, from_address: new_accounts[0].address });
       setAccounts(new_accounts);
       setIsTransactionPossible(true);
       toast.success("🦄 Wallet created successfully!");
@@ -80,7 +80,7 @@ const GetSeed = () => {
       const new_accounts = data.accounts.map((account) => {
         return {
           address: account.address,
-          privateKey: account.privateKey.slice(0, 4) + "..." + account.privateKey.slice(-4),
+          privateKey: account.privateKey,
           balance: account.balance,
         };
       });
@@ -178,12 +178,20 @@ const GetSeed = () => {
           onClick={() => {
             setStep(2);
             setIsTransactionVisible(true);
+            setForm({ ...form, from_address: accounts[0].address });
           }}
         >
           Continue
         </Button>
       </div>
-      <Toaster />
+      <Toaster
+        toastOptions={{
+          duration: 5000,
+          success: {
+            duration: 5000,
+          },
+        }}
+      />
     </div>
   );
 };

@@ -1,15 +1,17 @@
-import React from "react";
+import React, { useState } from "react";
 import { Button, Divider, Flex, Radio, Select } from "antd";
 import { useStore } from "../store/store.js";
 import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
 
 const Transaction = () => {
-  const { form, setForm, accounts } = useStore((state) => ({
+  const { form, setForm, accounts, setAccounts } = useStore((state) => ({
     form: state.form,
     setForm: state.setForm,
     accounts: state.accounts,
+    setAccounts: state.setAccounts,
   }));
+  const [isSending, setIsSending] = useState(false);
 
   const handleFromAddressChange = (value) => {
     setForm({ ...form, from_address: value });
@@ -22,7 +24,9 @@ const Transaction = () => {
       amount: form?.amount,
     };
     const privateKey = accounts?.find((account) => account?.address === from_address)?.privateKey;
+    console.log("privateKey", privateKey);
     try {
+      setIsSending(true);
       const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/sendTransaction`, {
         fromAddress: from_address,
         privateKey,
@@ -32,9 +36,22 @@ const Transaction = () => {
       });
       console.log(response);
       const data = response?.data;
+      const new_accounts = accounts.map((account) => {
+        if (account?.address === data.address) {
+          return {
+            address: data.address,
+            privateKey: account.privateKey,
+            balance: data.balance,
+          };
+          }
+          return account;
+        });
+      setAccounts(new_accounts);
       toast.success("🦄 Transaction sent successfully!");
       setForm({ ...form, amount: "" });
+      setIsSending(false);
     } catch (e) {
+      setIsSending(false);
       toast.error("😣 Transaction failed!");
       console.log(e);
     }
@@ -85,7 +102,7 @@ const Transaction = () => {
               Amount
             </label>
           </div>
-          <Button className="text-center max-w-20 bg-blue-600" type="primary" onClick={handleSendAmount}>
+          <Button disabled={isSending} className="text-center max-w-20 bg-blue-600" type="primary" onClick={handleSendAmount}>
             Send
           </Button>
         </div>
